@@ -1,0 +1,50 @@
+Query 1
+SELECT t.number_of_labels, COUNT(t.id) 
+FROM
+(
+	SELECT audio.id, count(label.audio_id) AS number_of_labels        
+	FROM audio
+	LEFT JOIN label
+	ON (audio.id = label.audio_id AND label.type = 'Fine' AND label.zooniverse_id IS NULL)
+	GROUP BY audio.id
+) t
+GROUP BY t.number_of_labels
+ORDER BY t.number_of_labels DESC;
+
+Query 2
+SELECT
+	name,
+	legacy_path
+FROM
+	audio
+WHERE
+	loc_id IN (
+      SELECT
+         id
+      FROM
+         location
+      WHERE
+         country = 'Thailand'
+   );
+   
+Query 3
+SELECT t.id, t.path
+FROM 
+(
+	SELECT audio.id, audio.path, COUNT(label.audio_id) AS number_of_labels
+	FROM audio
+	LEFT JOIN label
+	ON (audio.id = label.audio_id AND label.type = 'Fine' AND label.zooniverse_id IS NULL) 
+	GROUP BY audio.id
+) t
+WHERE t.number_of_labels > 0;
+
+Query 4
+SELECT label.id, audio.id, fine_start_time, fine_end_time
+FROM label 
+LEFT JOIN mosquito
+ON (label.mosquito_id = mosquito.id) 
+WHERE sound_type = 'mosquito' AND type = 'Fine';
+
+
+	

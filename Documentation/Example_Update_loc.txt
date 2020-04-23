@@ -1,0 +1,33 @@
+STEP 1
+
+DROP TABLE IF EXISTS import_loc_tmp;
+CREATE TABLE import_loc_tmp (
+  id serial PRIMARY KEY,
+  country VARCHAR (50),
+  district VARCHAR (50),
+  province VARCHAR (50),
+  place VARCHAR (255),
+  location_type loc_type
+);
+
+STEP 2
+
+COPY import_loc_tmp(country, district, province, place, location_type)
+FROM 'C:/Humbug/Docs/Documentation/loc.csv'
+WITH (format csv);
+
+STEP 3
+
+INSERT INTO location (country, district, province, place, location_type)
+  SELECT
+    i.country AS country,
+    i.district AS district,
+	i.province AS province,
+	i.place AS place,
+	i.location_type AS location_type
+    FROM (SELECT * FROM import_loc_tmp) i;
+
+Useful things
+SELECT c.relname FROM pg_class c WHERE c.relkind = 'S';
+ALTER SEQUENCE menu_number_seq RESTART
+

@@ -1,0 +1,87 @@
+
+CREATE TYPE loc_type AS ENUM ('culture', 'cup', 'field', 'lab');
+
+CREATE TABLE location(
+   id serial PRIMARY KEY,
+   country VARCHAR (50) NOT NULL DEFAULT 'world',
+   district VARCHAR (50),
+   province VARCHAR (50),
+   place VARCHAR (255),
+   location_type loc_type, 
+   MAP_id VARCHAR(50),
+   lat FLOAT,
+   long FLOAT
+);
+
+CREATE TABLE environment(
+   id serial PRIMARY KEY,
+   temperature FLOAT,
+   humidity FLOAT,
+   has_livestock BOOLEAN,
+   has_rice BOOLEAN,
+   has_forest BOOLEAN,
+   has_irrigation BOOLEAN
+);
+
+CREATE TYPE record_method_enum AS ENUM ('Audio', 'ABN', 'HBN', 'LT');
+
+CREATE TABLE device(
+   id serial PRIMARY KEY,
+   method record_method_enum,
+   mic_type VARCHAR(255),
+   device_type VARCHAR(255)
+);
+
+CREATE TABLE audio(
+   id serial PRIMARY KEY,
+   path VARCHAR(255) NOT NULL,
+   parent INTEGER REFERENCES audio(id),
+   record_datetime TIMESTAMP,
+   record_entity VARCHAR(50),
+   doc_path VARCHAR(255),
+   env_id INTEGER REFERENCES environment(id) NOT NULL DEFAULT 1,
+   loc_id INTEGER REFERENCES location(id) NOT NULL DEFAULT 1,
+   dev_id INTEGER REFERENCES device(id) NOT NULL DEFAULT 1,
+   dashboard_id VARCHAR(50),
+   zooniverse_id VARCHAR(50),
+   name VARCHAR(255) NOT NULL UNIQUE,
+   legacy_path VARCHAR(255),
+   sample_rate INT,
+   length FLOAT
+);
+
+CREATE TYPE gender_enum AS ENUM('Male', 'Female');
+
+CREATE TYPE plurality_enum AS ENUM('Single', 'Plural');
+
+CREATE TABLE mosquito(
+   id serial PRIMARY KEY,
+   species VARCHAR(50),
+   gender gender_enum,
+   age INT,
+   fed BOOLEAN,
+   plurality plurality_enum,
+   sound_type VARCHAR(50) NOT NULL
+);
+
+CREATE TYPE labeller_type AS ENUM('Algorithm', 'Expert_Morphological', 'Expert_Molecular', 'Engineer', 'Zooniverse');
+
+CREATE TABLE labeller(
+   id serial PRIMARY KEY,
+   name VARCHAR(50),
+   type labeller_type
+);
+
+CREATE TYPE label_type AS ENUM('Fine', 'Coarse');
+
+CREATE TABLE label(
+   id BIGSERIAL PRIMARY KEY,
+   audio_id INTEGER REFERENCES audio(id) NOT NULL,
+   type label_type NOT NULL,
+   mosquito_id INTEGER REFERENCES mosquito(id) NOT NULL,
+   labeller_id INTEGER REFERENCES labeller(id) NOT NULL,
+   fine_start_time float CHECK((type != 'Fine') OR (fine_start_time IS NOT NULL)),
+   fine_end_time float CHECK((type != 'Fine') OR (fine_end_time IS NOT NULL)),
+   zooniverse_id VARCHAR(50) UNIQUE,
+   coarse_label BOOLEAN
+);
