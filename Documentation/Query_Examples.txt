@@ -40,7 +40,7 @@ FROM
 WHERE t.number_of_labels > 0;
 
 Query 4
-SELECT label.id, audio.id, fine_start_time, fine_end_time
+SELECT label.id, audio_id, fine_start_time, fine_end_time
 FROM label 
 LEFT JOIN mosquito
 ON (label.mosquito_id = mosquito.id) 
